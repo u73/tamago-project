@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""Anthropic Claude バックエンド"""
+"""Anthropic Claude backend"""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ class AnthropicBackend(LLMBackend):
         try:
             import anthropic
         except ImportError:
-            raise ImportError("anthropic パッケージが必要です: uv add anthropic")
+            raise ImportError("anthropic package is required: uv add anthropic")
         self._model = model or DEFAULT_MODEL
         self._client = anthropic.Anthropic()
 

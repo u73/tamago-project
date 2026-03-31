@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""~/.tamago/config.yaml の読み書き管理"""
+"""Configuration management for ~/.tamago/config.yaml"""
 
 from __future__ import annotations
 
@@ -31,31 +31,31 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "base_url": "http://localhost:11434",
         },
         "llamacpp": {
-            "model_path": None,       # GGUF ファイルのパス（必須）
-            "chat_format": "chatml",  # chatml / llama-2 / mistral-instruct など
-            "n_ctx": 4096,            # コンテキスト長
-            "n_gpu_layers": 0,        # 0=CPUのみ / -1=全レイヤーをGPUに
+            "model_path": None,       # Path to GGUF file (required)
+            "chat_format": "chatml",  # chatml / llama-2 / mistral-instruct etc.
+            "n_ctx": 4096,            # Context length
+            "n_gpu_layers": 0,        # 0=CPU only / -1=all layers on GPU
         },
     },
 }
 
-# llamacpp から削除すべき旧キー（旧 HTTP API 方式の残骸）
+# Legacy keys to remove from llamacpp (remnants of old HTTP API approach)
 _LLAMACPP_REMOVED_KEYS = {"base_url", "model"}
 
 
 def load_config() -> dict[str, Any]:
-    """~/.tamago/config.yaml を読み込む。なければデフォルトを返す。"""
+    """Load ~/.tamago/config.yaml. Returns defaults if file doesn't exist."""
     if not CONFIG_FILE.exists():
         return copy.deepcopy(DEFAULT_CONFIG)
     with CONFIG_FILE.open(encoding="utf-8") as f:
         loaded = yaml.safe_load(f) or {}
-    # デフォルト値とマージ（backends は各バックエンドをマージ）
+    # Merge with defaults (backends are merged per-backend)
     config = copy.deepcopy(DEFAULT_CONFIG)
     config.update({k: v for k, v in loaded.items() if k != "backends"})
     if "backends" in loaded:
         for name, settings in loaded["backends"].items():
             merged = settings or {}
-            # llamacpp の旧キーを除去して新フォーマットに正規化
+            # Strip legacy llamacpp keys to normalize to new format
             if name == "llamacpp":
                 merged = {k: v for k, v in merged.items() if k not in _LLAMACPP_REMOVED_KEYS}
             if name in config["backends"]:
@@ -66,7 +66,7 @@ def load_config() -> dict[str, Any]:
 
 
 def save_config(config: dict[str, Any]) -> None:
-    """~/.tamago/config.yaml に保存する"""
+    """Save configuration to ~/.tamago/config.yaml."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with CONFIG_FILE.open("w", encoding="utf-8") as f:
         yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
@@ -86,7 +86,7 @@ def get_backend_config(backend_name: str) -> dict[str, Any]:
 
 
 def set_backend(backend_name: str, backend_config: dict[str, Any] | None = None) -> None:
-    """アクティブバックエンドを変更し、設定を保存する"""
+    """Change the active backend and save configuration."""
     config = load_config()
     config["backend"] = backend_name
     if backend_config:

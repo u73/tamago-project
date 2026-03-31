@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""多言語対応 (i18n) — dict ベースの軽量翻訳"""
+"""Internationalization (i18n) — lightweight dict-based translations"""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ _lang: str = "ja"
 
 TRANSLATIONS: dict[str, dict[str, str]] = {
     "ja": {
-        # ── CLI 全般 ──
+        # ── CLI general ──
         "cli.help": "自分の分身AIを育てるCLIツール",
         "cli.llm_error": "LLM エラー: {error}",
 
@@ -91,7 +91,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # ── memory ──
         "memory.not_found": "{file} が見つかりません。`tamago init` を実行してください。",
 
-        # ── セクション名 ──
+        # ── section names ──
         "section.basic_info": "基本情報",
         "section.values": "思想・価値観",
         "section.expertise": "専門知識・領域",
@@ -101,7 +101,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "section.dislikes": "嫌いなもの・避けたいこと",
         "section.history": "更新履歴",
 
-        # ── テンプレート ──
+        # ── template ──
         "template.memory": (
             "# MEMORY.md\n\n"
             "> このファイルはtamagoによって生成・管理されています。\n"
@@ -116,7 +116,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
             "## 更新履歴\n\n"
         ),
 
-        # ── プロンプト ──
+        # ── prompts ──
         "prompt.train_question": (
             "あなたはユーザーの分身AI「tamago」のトレーナーです。\n"
             "ユーザーのことを深く理解するために質問をしてください。\n\n"
@@ -318,7 +318,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 }
 
-# セクション識別用キー（言語非依存）
+# Language-independent section keys
 SECTION_KEYS = [
     "basic_info",
     "values",
@@ -332,22 +332,22 @@ SECTION_KEYS = [
 
 
 def set_language(lang: str) -> None:
-    """アクティブ言語を設定する"""
+    """Set the active language."""
     global _lang
     if lang in TRANSLATIONS:
         _lang = lang
 
 
 def get_language() -> str:
-    """現在の言語を返す"""
+    """Return the current language."""
     return _lang
 
 
 def t(key: str, **kwargs: str) -> str:
-    """翻訳キーに対応する文字列を返す
+    """Return the translated string for the given key.
 
-    kwargs が渡された場合は .format() を適用する。
-    キーが見つからなければ ja にフォールバック。
+    If kwargs are provided, apply .format().
+    Falls back to 'ja' if the key is not found in the current language.
     """
     text = TRANSLATIONS.get(_lang, {}).get(key)
     if text is None:

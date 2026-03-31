@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""Ollama バックエンド"""
+"""Ollama backend"""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class OllamaBackend(LLMBackend):
         try:
             from ollama import Client  # type: ignore[import-untyped]
         except ImportError:
-            raise ImportError("ollama パッケージが必要です: uv add ollama")
+            raise ImportError("ollama package is required: uv add ollama")
         self._model = model or DEFAULT_MODEL
         self._client = Client(host=base_url or DEFAULT_BASE_URL)
 

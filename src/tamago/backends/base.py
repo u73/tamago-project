@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""LLM バックエンドの抽象基底クラス"""
+"""Abstract base class for LLM backends"""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 
 class LLMBackend(ABC):
-    """全バックエンドが実装すべきインターフェース"""
+    """Interface that all backends must implement."""
 
     @abstractmethod
     def chat(
@@ -19,15 +19,15 @@ class LLMBackend(ABC):
         messages: list[dict[str, str]],
         max_tokens: int = 1024,
     ) -> str:
-        """
-        system プロンプトと会話履歴を受け取り、次の応答テキストを返す。
+        """Take a system prompt and conversation history, return the next response.
 
-        messages は OpenAI 互換の形式: [{"role": "user"|"assistant", "content": "..."}]
+        messages follows the OpenAI-compatible format:
+        [{"role": "user"|"assistant", "content": "..."}]
         """
         ...
 
     @property
     @abstractmethod
     def name(self) -> str:
-        """バックエンド識別子（例: "anthropic", "openai"）"""
+        """Backend identifier (e.g., "anthropic", "openai")."""
         ...

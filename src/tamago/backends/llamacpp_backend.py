@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""llama-cpp-python バックエンド（GGUF モデルを直接実行）"""
+"""llama-cpp-python backend (direct GGUF model execution)"""
 
 from __future__ import annotations
 
@@ -12,16 +12,16 @@ from tamago.backends.base import LLMBackend
 
 DEFAULT_CHAT_FORMAT = "chatml"
 DEFAULT_N_CTX = 4096
-DEFAULT_N_GPU_LAYERS = 0  # 0 = CPU のみ。GPU 使用時は -1 (全レイヤー) を推奨
+DEFAULT_N_GPU_LAYERS = 0  # 0 = CPU only. Use -1 for all layers on GPU
 
 
 class LlamaCppBackend(LLMBackend):
-    """
-    llama-cpp-python を使って GGUF モデルをプロセス内で直接実行する。
-    llama.cpp バイナリや外部サーバーは不要。
+    """Run GGUF models in-process via llama-cpp-python.
 
-    インストール:
-        uv add llama-cpp-python              # CPU のみ
+    No llama.cpp binary or external server required.
+
+    Install:
+        uv add llama-cpp-python              # CPU only
         CMAKE_ARGS="-DGGML_METAL=on" uv add llama-cpp-python   # Apple Silicon GPU
         CMAKE_ARGS="-DGGML_CUDA=on"  uv add llama-cpp-python   # NVIDIA GPU
     """
@@ -38,21 +38,21 @@ class LlamaCppBackend(LLMBackend):
             from llama_cpp import Llama  # type: ignore[import-untyped]
         except ImportError:
             raise ImportError(
-                "llama-cpp-python が必要です:\n"
-                "  CPU のみ:          uv add llama-cpp-python\n"
+                "llama-cpp-python is required:\n"
+                "  CPU only:          uv add llama-cpp-python\n"
                 "  Apple Silicon GPU: CMAKE_ARGS=\"-DGGML_METAL=on\" uv add llama-cpp-python\n"
                 "  NVIDIA GPU:        CMAKE_ARGS=\"-DGGML_CUDA=on\"  uv add llama-cpp-python"
             )
 
         if not model_path:
             raise ValueError(
-                "llamacpp バックエンドには model_path が必要です。\n"
-                "`tamago init` を再実行して GGUF ファイルのパスを設定してください。"
+                "llamacpp backend requires model_path.\n"
+                "Re-run `tamago init` to set the GGUF file path."
             )
 
         resolved = Path(model_path).expanduser().resolve()
         if not resolved.exists():
-            raise FileNotFoundError(f"GGUF モデルが見つかりません: {resolved}")
+            raise FileNotFoundError(f"GGUF model not found: {resolved}")
 
         self._llm = Llama(
             model_path=str(resolved),

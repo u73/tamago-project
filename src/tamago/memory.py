@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""MEMORY.md の読み書き・パース"""
+"""MEMORY.md read/write/parse utilities"""
 
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ MEMORY_FILE = "MEMORY.md"
 
 
 def _section_names() -> list[str]:
-    """現在の言語でのセクション名リストを返す"""
+    """Return section names in the current language."""
     return [t(f"section.{k}") for k in SECTION_KEYS]
 
 
 def _history_section_names() -> set[str]:
-    """全言語の「更新履歴」セクション名を返す（言語切替対応）"""
+    """Return the history section name in all languages (for cross-language compat)."""
     return {"更新履歴", "History"}
 
 
@@ -34,7 +34,7 @@ def memory_exists() -> bool:
 
 
 def create_memory() -> Path:
-    """MEMORY.md を雛形から生成する"""
+    """Generate MEMORY.md from the template."""
     dest = get_memory_path()
     template = t("template.memory")
     dest.write_text(template, encoding="utf-8")
@@ -42,7 +42,7 @@ def create_memory() -> Path:
 
 
 def read_memory() -> str:
-    """MEMORY.md の全文を読み込む"""
+    """Read the full contents of MEMORY.md."""
     path = get_memory_path()
     if not path.exists():
         raise FileNotFoundError(t("memory.not_found", file=MEMORY_FILE))
@@ -50,12 +50,12 @@ def read_memory() -> str:
 
 
 def write_memory(content: str) -> None:
-    """MEMORY.md を上書き保存する"""
+    """Overwrite MEMORY.md."""
     get_memory_path().write_text(content, encoding="utf-8")
 
 
 def parse_sections(content: str) -> dict[str, str]:
-    """MEMORY.md をセクションごとにパースする"""
+    """Parse MEMORY.md into sections keyed by header name."""
     sections: dict[str, str] = {}
     current_section: str | None = None
     current_lines: list[str] = []
@@ -77,7 +77,7 @@ def parse_sections(content: str) -> dict[str, str]:
 
 
 def update_section(content: str, section_name: str, new_content: str) -> str:
-    """指定セクションの内容を置換する"""
+    """Replace the content of a specific section."""
     lines = content.splitlines()
     result: list[str] = []
     in_target = False
@@ -87,7 +87,7 @@ def update_section(content: str, section_name: str, new_content: str) -> str:
         match = re.match(r"^## (.+)$", line)
         if match:
             if in_target:
-                # 前のセクションの終わり
+                # End of the target section
                 result.append("")
                 result.append(line)
                 in_target = False
@@ -102,7 +102,7 @@ def update_section(content: str, section_name: str, new_content: str) -> str:
         if not in_target:
             result.append(line)
 
-    # 最後のセクションだった場合
+    # Handle case where target was the last section
     if in_target and not replaced:
         result.append("")
 
@@ -110,13 +110,13 @@ def update_section(content: str, section_name: str, new_content: str) -> str:
 
 
 def add_history_entry(content: str, entry: str) -> str:
-    """更新履歴セクションにエントリを追加する"""
+    """Add an entry to the history section."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     history_entry = f"- [{timestamp}] {entry}"
 
     sections = parse_sections(content)
 
-    # 言語に関係なく更新履歴セクションを探す
+    # Find the history section regardless of language
     history_name = None
     for name in _history_section_names():
         if name in sections:
@@ -124,7 +124,7 @@ def add_history_entry(content: str, entry: str) -> str:
             break
 
     if history_name is None:
-        # 見つからなければ現在の言語のセクション名を使う
+        # Fall back to the current language's section name
         history_name = t("section.history")
 
     current_history = sections.get(history_name, "")
@@ -138,7 +138,7 @@ def add_history_entry(content: str, entry: str) -> str:
 
 
 def section_stats(content: str) -> dict[str, dict[str, int]]:
-    """各セクションの統計情報を返す"""
+    """Return per-section statistics (chars, lines)."""
     sections = parse_sections(content)
     history_names = _history_section_names()
     stats: dict[str, dict[str, int]] = {}

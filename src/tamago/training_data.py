@@ -2,15 +2,15 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""Fine-tuning 用 JSONL の読み書き
+"""Fine-tuning JSONL read/write utilities.
 
-system プロンプトは MEMORY.md のハッシュで参照し、
-実体は JSONL 先頭の __system_prompts__ エントリに格納する。
-これにより同じ MEMORY.md 内容が何百行も重複することを防ぐ。
+System prompts are referenced by MEMORY.md hash,
+with the actual content stored in a __system_prompts__ entry at the top of the JSONL.
+This prevents the same MEMORY.md content from being duplicated across hundreds of rows.
 
-JSONL 構造:
-  行0:   {"__system_prompts__": {"<hash>": "<content>", ...}}
-  行1-N: {"messages": [...], "metadata": {...}, "system_hash": "<hash>"}
+JSONL structure:
+  Row 0:   {"__system_prompts__": {"<hash>": "<content>", ...}}
+  Row 1-N: {"messages": [...], "metadata": {...}, "system_hash": "<hash>"}
 """
 
 from __future__ import annotations
@@ -30,17 +30,17 @@ Source = Literal["train", "talk"]
 
 
 def get_jsonl_path() -> Path:
-    """MEMORY.jsonl のパスを返す（MEMORY.md と同じディレクトリ）"""
+    """Return the path to MEMORY.jsonl (same directory as MEMORY.md)."""
     return get_memory_path().parent / JSONL_FILE
 
 
 def _content_hash(text: str) -> str:
-    """system プロンプトの短縮ハッシュを返す"""
+    """Return a truncated SHA-256 hash of a system prompt."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
 
 
 # ------------------------------------------------------------------ #
-# 内部: system プロンプトストア
+# Internal: system prompt store
 # ------------------------------------------------------------------ #
 
 def _load_raw_lines(path: Path) -> list[str]:
@@ -51,7 +51,7 @@ def _load_raw_lines(path: Path) -> list[str]:
 
 
 def _load_system_store(path: Path) -> dict[str, str]:
-    """先頭行の __system_prompts__ マップを読み出す"""
+    """Read the __system_prompts__ map from the first line."""
     lines = _load_raw_lines(path)
     if not lines:
         return {}
@@ -62,10 +62,10 @@ def _load_system_store(path: Path) -> dict[str, str]:
 
 
 def _save_system_store(path: Path, store: dict[str, str]) -> None:
-    """先頭行を __system_prompts__ で上書き（他の行は維持）"""
+    """Overwrite the first line with __system_prompts__ (preserve other lines)."""
     lines = _load_raw_lines(path)
     header = json.dumps({"__system_prompts__": store}, ensure_ascii=False) + "\n"
-    # 既存ヘッダーがあれば差し替え、なければ先頭に追加
+    # Replace existing header or prepend if none exists
     if lines:
         first = json.loads(lines[0])
         if "__system_prompts__" in first:
@@ -79,7 +79,7 @@ def _save_system_store(path: Path, store: dict[str, str]) -> None:
 
 
 def _ensure_system(path: Path, system: str) -> str:
-    """system プロンプトをストアに登録し、ハッシュを返す"""
+    """Register a system prompt in the store and return its hash."""
     h = _content_hash(system)
     store = _load_system_store(path)
     if h not in store:
@@ -89,7 +89,7 @@ def _ensure_system(path: Path, system: str) -> str:
 
 
 # ------------------------------------------------------------------ #
-# 公開 API
+# Public API
 # ------------------------------------------------------------------ #
 
 def append_entry(
@@ -98,7 +98,7 @@ def append_entry(
     assistant: str,
     source: Source,
 ) -> None:
-    """MEMORY.jsonl に 1件追記する"""
+    """Append one entry to MEMORY.jsonl."""
     path = get_jsonl_path()
     h = _ensure_system(path, system)
     entry = {
@@ -122,10 +122,10 @@ def append_train(
     question: str,
     answer: str,
 ) -> None:
-    """train セッションの Q&A を追記する
+    """Append a train session Q&A pair.
 
-    user      = AI トレーナーの質問
-    assistant = ユーザーの回答（= 分身が持つべき正解）
+    user      = AI trainer's question
+    assistant = user's answer (the ground truth for the clone)
     """
     system = get_train_finetune_system().format(memory_content=memory_content)
     append_entry(system, question, answer, source="train")
@@ -136,17 +136,17 @@ def append_talk(
     user_message: str,
     tamago_response: str,
 ) -> None:
-    """talk セッションの 1往復を追記する
+    """Append one talk session exchange.
 
-    user      = 会話相手の発言
-    assistant = tamago の応答（= 分身の振る舞い）
+    user      = conversation partner's message
+    assistant = tamago's response (the clone's behavior)
     """
     system = get_talk_system().format(memory_content=memory_content)
     append_entry(system, user_message, tamago_response, source="talk")
 
 
 def read_all() -> list[dict]:
-    """MEMORY.jsonl の全エントリを返す（__system_prompts__ 行は除外）"""
+    """Return all entries from MEMORY.jsonl (excluding __system_prompts__ row)."""
     path = get_jsonl_path()
     if not path.exists():
         return []
@@ -164,7 +164,7 @@ def read_all() -> list[dict]:
 
 
 def stats() -> dict[str, int]:
-    """エントリ数の統計を返す"""
+    """Return entry count statistics."""
     entries = read_all()
     total = len(entries)
     by_source: dict[str, int] = {}

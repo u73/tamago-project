@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""LLM 操作のユーティリティ（バックエンド非依存）"""
+"""LLM utilities (backend-agnostic)"""
 
 from __future__ import annotations
 
@@ -18,13 +18,13 @@ from tamago.prompts import (
 
 load_dotenv()
 
-# バックエンド設定が変わらない限り同じインスタンスを使い回す
+# Reuse the same backend instance unless the config changes
 _cached_backend: LLMBackend | None = None
 _cached_backend_name: str | None = None
 
 
 def _backend() -> LLMBackend:
-    """アクティブバックエンドのシングルトンを返す"""
+    """Return a singleton for the active backend."""
     global _cached_backend, _cached_backend_name
     from tamago.config import get_active_backend
 
@@ -36,15 +36,15 @@ def _backend() -> LLMBackend:
 
 
 def train_question(memory_content: str, conversation: list[dict[str, str]]) -> str:
-    """trainモードでの質問を生成する"""
+    """Generate a question for train mode."""
     system = get_train_question_system().format(memory_content=memory_content)
     return _backend().chat(system, conversation)
 
 
 def train_update(memory_content: str, question: str, answer: str) -> str:
-    """ユーザーの回答からMEMORY.mdの更新内容を生成する
+    """Generate updated MEMORY.md content from the user's answer.
 
-    更新されたMEMORY.md全文を返す。
+    Returns the full updated MEMORY.md text.
     """
     system = get_train_update_system().format(memory_content=memory_content)
     messages = [
@@ -54,6 +54,6 @@ def train_update(memory_content: str, question: str, answer: str) -> str:
 
 
 def talk_response(memory_content: str, messages: list[dict[str, str]]) -> str:
-    """talkモードでユーザーの分身として応答する"""
+    """Respond as the user's AI clone in talk mode."""
     system = get_talk_system().format(memory_content=memory_content)
     return _backend().chat(system, messages)

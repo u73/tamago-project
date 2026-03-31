@@ -2,9 +2,9 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""システムプロンプト定義（i18n 対応）
+"""System prompt definitions (i18n-aware).
 
-llm.py と training_data.py の両方がここを参照する。
+Referenced by both llm.py and training_data.py.
 """
 
 from tamago.i18n import t

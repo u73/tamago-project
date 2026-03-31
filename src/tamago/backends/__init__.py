@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""LLM バックエンドファクトリー"""
+"""LLM backend factory"""
 
 from __future__ import annotations
 
@@ -19,20 +19,20 @@ AVAILABLE_BACKENDS = list(_REGISTRY.keys())
 
 
 def get_backend(name: str | None = None, **kwargs: object) -> LLMBackend:
-    """
-    バックエンド名から LLMBackend インスタンスを返す。
-    name が None の場合は ~/.tamago/config.yaml の設定を使う。
+    """Return an LLMBackend instance for the given backend name.
+
+    If name is None, uses the setting from ~/.tamago/config.yaml.
     """
     from tamago.config import get_active_backend, get_backend_config
 
     backend_name = name or get_active_backend()
     if backend_name not in _REGISTRY:
         raise ValueError(
-            f"未知のバックエンド: '{backend_name}'\n"
-            f"利用可能: {', '.join(AVAILABLE_BACKENDS)}"
+            f"Unknown backend: '{backend_name}'\n"
+            f"Available: {', '.join(AVAILABLE_BACKENDS)}"
         )
 
-    # config からバックエンド設定をマージ
+    # Merge backend config from config.yaml
     cfg = get_backend_config(backend_name)
     cfg.update(kwargs)
 

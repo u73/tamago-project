@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""OpenAI バックエンド"""
+"""OpenAI backend"""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ class OpenAIBackend(LLMBackend):
         try:
             from openai import OpenAI  # type: ignore[import-untyped]
         except ImportError:
-            raise ImportError("openai パッケージが必要です: uv add openai")
+            raise ImportError("openai package is required: uv add openai")
         self._model = model or DEFAULT_MODEL
         self._client = OpenAI(base_url=base_url) if base_url else OpenAI()
 

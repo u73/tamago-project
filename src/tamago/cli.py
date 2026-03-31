@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Kazuaki Yokura (U73)
 # Licensed under the MIT License. See LICENSE file for details.
 
-"""tamago CLI - 自分の分身AIを育てるCLIツール"""
+"""tamago CLI — main entry point for all commands"""
 
 from __future__ import annotations
 
@@ -26,16 +26,16 @@ console = Console()
 
 
 def _init_language() -> None:
-    """config から言語設定を読み込んで i18n を初期化する"""
+    """Load language setting from config and initialize i18n."""
     set_language(cfg.get_language())
 
 
 # ------------------------------------------------------------------ #
-# ヘルパー
+# Helpers
 # ------------------------------------------------------------------ #
 
 def _llm_call(label: str, fn, *args, **kwargs):
-    """LLM 呼び出しをラップし、エラー時に会話ループを壊さない"""
+    """Wrap an LLM call so errors don't break the conversation loop."""
     try:
         with console.status(f"[bold cyan]{label}[/bold cyan]"):
             return fn(*args, **kwargs)
@@ -53,7 +53,7 @@ def init():
     """MEMORY.md を生成して tamago を初期化する / Generate MEMORY.md and initialize tamago"""
     _init_language()
 
-    # --- 言語選択 ---
+    # --- Language selection ---
     console.print(f"\n[bold]{t('cli.init.select_language')}[/bold]")
     console.print("  1. 日本語 (Japanese)")
     console.print("  2. English")
@@ -61,7 +61,7 @@ def init():
     lang_choice = typer.prompt("1-2", default="1")
     lang = "en" if lang_choice.strip() == "2" else "ja"
 
-    # 言語を保存して再初期化
+    # Save language and reinitialize i18n
     config = cfg.load_config()
     config["language"] = lang
     cfg.save_config(config)
@@ -73,7 +73,7 @@ def init():
             console.print(f"[yellow]{t('cli.init.cancelled')}[/yellow]")
             raise typer.Exit()
 
-    # --- バックエンド選択 ---
+    # --- Backend selection ---
     current = cfg.get_active_backend()
     console.print(f"\n[bold]{t('cli.init.select_backend')}[/bold]")
     for i, name in enumerate(AVAILABLE_BACKENDS, 1):
@@ -95,7 +95,7 @@ def init():
     backend_name = AVAILABLE_BACKENDS[idx]
     backend_cfg = cfg.load_config()["backends"].get(backend_name, {})
 
-    # バックエンド固有の追加設定
+    # Backend-specific configuration
     if backend_name == "ollama":
         default_url = backend_cfg.get("base_url", "http://localhost:11434")
         backend_cfg["base_url"] = typer.prompt(t("cli.init.server_url"), default=default_url)
@@ -132,7 +132,7 @@ def init():
     cfg.set_backend(backend_name, backend_cfg)
     console.print(f"[green]{t('cli.init.backend_set', name=backend_name)}[/green]")
 
-    # --- MEMORY.md 生成 ---
+    # --- Generate MEMORY.md ---
     path = memory.create_memory()
     console.print(Panel(
         t("cli.init.panel_body",
