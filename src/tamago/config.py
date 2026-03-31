@@ -12,6 +12,7 @@ CONFIG_DIR = Path.home() / ".tamago"
 CONFIG_FILE = CONFIG_DIR / "config.yaml"
 
 DEFAULT_CONFIG: dict[str, Any] = {
+    "language": "ja",
     "backend": "anthropic",
     "backends": {
         "anthropic": {
@@ -65,6 +66,10 @@ def save_config(config: dict[str, Any]) -> None:
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with CONFIG_FILE.open("w", encoding="utf-8") as f:
         yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
+
+
+def get_language() -> str:
+    return load_config().get("language", "ja")
 
 
 def get_active_backend() -> str:

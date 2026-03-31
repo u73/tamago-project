@@ -1,4 +1,6 @@
-# tamago 🥚
+# tamago
+
+> [English](README.en.md)
 
 自分の分身AIを育てるCLIツール。
 

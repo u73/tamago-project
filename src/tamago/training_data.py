@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Literal
 
 from tamago.memory import get_memory_path
-from tamago.prompts import TALK_SYSTEM, TRAIN_FINETUNE_SYSTEM
+from tamago.prompts import get_talk_system, get_train_finetune_system
 
 JSONL_FILE = "MEMORY.jsonl"
 
@@ -123,7 +123,7 @@ def append_train(
     user      = AI トレーナーの質問
     assistant = ユーザーの回答（= 分身が持つべき正解）
     """
-    system = TRAIN_FINETUNE_SYSTEM.format(memory_content=memory_content)
+    system = get_train_finetune_system().format(memory_content=memory_content)
     append_entry(system, question, answer, source="train")
 
 
@@ -137,7 +137,7 @@ def append_talk(
     user      = 会話相手の発言
     assistant = tamago の応答（= 分身の振る舞い）
     """
-    system = TALK_SYSTEM.format(memory_content=memory_content)
+    system = get_talk_system().format(memory_content=memory_content)
     append_entry(system, user_message, tamago_response, source="talk")
 
 

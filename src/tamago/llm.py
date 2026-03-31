@@ -5,7 +5,12 @@ from __future__ import annotations
 from dotenv import load_dotenv
 
 from tamago.backends import LLMBackend, get_backend
-from tamago.prompts import TRAIN_QUESTION_SYSTEM, TRAIN_UPDATE_SYSTEM, TALK_SYSTEM
+from tamago.prompts import (
+    get_train_question_system,
+    get_train_update_system,
+    get_train_update_user,
+    get_talk_system,
+)
 
 load_dotenv()
 
@@ -28,7 +33,7 @@ def _backend() -> LLMBackend:
 
 def train_question(memory_content: str, conversation: list[dict[str, str]]) -> str:
     """trainモードでの質問を生成する"""
-    system = TRAIN_QUESTION_SYSTEM.format(memory_content=memory_content)
+    system = get_train_question_system().format(memory_content=memory_content)
     return _backend().chat(system, conversation)
 
 
@@ -37,14 +42,14 @@ def train_update(memory_content: str, question: str, answer: str) -> str:
 
     更新されたMEMORY.md全文を返す。
     """
-    system = TRAIN_UPDATE_SYSTEM.format(memory_content=memory_content)
+    system = get_train_update_system().format(memory_content=memory_content)
     messages = [
-        {"role": "user", "content": f"質問: {question}\n\n回答: {answer}\n\n上記を踏まえて、更新後のMEMORY.md全文を返してください。"},
+        {"role": "user", "content": get_train_update_user(question, answer)},
     ]
     return _backend().chat(system, messages, max_tokens=4096)
 
 
 def talk_response(memory_content: str, messages: list[dict[str, str]]) -> str:
     """talkモードでユーザーの分身として応答する"""
-    system = TALK_SYSTEM.format(memory_content=memory_content)
+    system = get_talk_system().format(memory_content=memory_content)
     return _backend().chat(system, messages)

@@ -6,19 +6,19 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-MEMORY_FILE = "MEMORY.md"
-TEMPLATE_PATH = Path(__file__).parent / "templates" / "memory_template.md"
+from tamago.i18n import t, SECTION_KEYS
 
-SECTIONS = [
-    "基本情報",
-    "思想・価値観",
-    "専門知識・領域",
-    "興味・関心",
-    "思考スタイル",
-    "話し方のトーン",
-    "嫌いなもの・避けたいこと",
-    "更新履歴",
-]
+MEMORY_FILE = "MEMORY.md"
+
+
+def _section_names() -> list[str]:
+    """現在の言語でのセクション名リストを返す"""
+    return [t(f"section.{k}") for k in SECTION_KEYS]
+
+
+def _history_section_names() -> set[str]:
+    """全言語の「更新履歴」セクション名を返す（言語切替対応）"""
+    return {"更新履歴", "History"}
 
 
 def get_memory_path() -> Path:
@@ -32,7 +32,7 @@ def memory_exists() -> bool:
 def create_memory() -> Path:
     """MEMORY.md を雛形から生成する"""
     dest = get_memory_path()
-    template = TEMPLATE_PATH.read_text(encoding="utf-8")
+    template = t("template.memory")
     dest.write_text(template, encoding="utf-8")
     return dest
 
@@ -41,7 +41,7 @@ def read_memory() -> str:
     """MEMORY.md の全文を読み込む"""
     path = get_memory_path()
     if not path.exists():
-        raise FileNotFoundError(f"{MEMORY_FILE} が見つかりません。`tamago init` を実行してください。")
+        raise FileNotFoundError(t("memory.not_found", file=MEMORY_FILE))
     return path.read_text(encoding="utf-8")
 
 
@@ -111,23 +111,35 @@ def add_history_entry(content: str, entry: str) -> str:
     history_entry = f"- [{timestamp}] {entry}"
 
     sections = parse_sections(content)
-    current_history = sections.get("更新履歴", "")
+
+    # 言語に関係なく更新履歴セクションを探す
+    history_name = None
+    for name in _history_section_names():
+        if name in sections:
+            history_name = name
+            break
+
+    if history_name is None:
+        # 見つからなければ現在の言語のセクション名を使う
+        history_name = t("section.history")
+
+    current_history = sections.get(history_name, "")
 
     if current_history:
         new_history = f"{history_entry}\n{current_history}"
     else:
         new_history = history_entry
 
-    return update_section(content, "更新履歴", new_history)
+    return update_section(content, history_name, new_history)
 
 
 def section_stats(content: str) -> dict[str, dict[str, int]]:
     """各セクションの統計情報を返す"""
     sections = parse_sections(content)
+    history_names = _history_section_names()
     stats: dict[str, dict[str, int]] = {}
-    for name in SECTIONS:
-        text = sections.get(name, "")
-        if name == "更新履歴":
+    for name, text in sections.items():
+        if name in history_names:
             continue
         chars = len(text)
         lines = len([l for l in text.splitlines() if l.strip()]) if text else 0

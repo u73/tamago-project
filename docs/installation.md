@@ -16,8 +16,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ## tamago のインストール
 
 ```bash
-git clone https://github.com/yourname/tamago.git
-cd tamago
+git clone https://github.com/u73/tamago-project.git
+cd tamago-project
 uv sync
 ```
 
