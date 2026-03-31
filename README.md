@@ -10,8 +10,8 @@
 
 ```bash
 # 1. リポジトリをクローン
-git clone https://github.com/yourname/tamago.git
-cd tamago
+git clone https://github.com/u73/tamago-project.git
+cd tamago-project
 
 # 2. 依存インストール
 uv sync
