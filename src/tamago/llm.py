@@ -1,3 +1,7 @@
+# tamago - AI clone CLI
+# Copyright (c) 2026 Kazuaki Yokura (U73)
+# Licensed under the MIT License. See LICENSE file for details.
+
 """LLM 操作のユーティリティ（バックエンド非依存）"""
 
 from __future__ import annotations

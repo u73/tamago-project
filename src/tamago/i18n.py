@@ -1,3 +1,7 @@
+# tamago - AI clone CLI
+# Copyright (c) 2026 Kazuaki Yokura (U73)
+# Licensed under the MIT License. See LICENSE file for details.
+
 """多言語対応 (i18n) — dict ベースの軽量翻訳"""
 
 from __future__ import annotations

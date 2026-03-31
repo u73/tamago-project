@@ -1,3 +1,7 @@
+# tamago - AI clone CLI
+# Copyright (c) 2026 Kazuaki Yokura (U73)
+# Licensed under the MIT License. See LICENSE file for details.
+
 """システムプロンプト定義（i18n 対応）
 
 llm.py と training_data.py の両方がここを参照する。

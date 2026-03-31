@@ -1,3 +1,7 @@
+# tamago - AI clone CLI
+# Copyright (c) 2026 Kazuaki Yokura (U73)
+# Licensed under the MIT License. See LICENSE file for details.
+
 """Fine-tuning 用 JSONL の読み書き
 
 system プロンプトは MEMORY.md のハッシュで参照し、

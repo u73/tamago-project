@@ -5,6 +5,7 @@ description = "自分の分身AIを育てるCLIツール"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
+authors = [{ name = "Kazuaki Yokura (U73)" }]
 dependencies = [
     "typer>=0.9.0",
     "anthropic>=0.40.0",

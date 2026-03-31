@@ -1,3 +1,7 @@
+# tamago - AI clone CLI
+# Copyright (c) 2026 Kazuaki Yokura (U73)
+# Licensed under the MIT License. See LICENSE file for details.
+
 """llama-cpp-python バックエンド（GGUF モデルを直接実行）"""
 
 from __future__ import annotations
